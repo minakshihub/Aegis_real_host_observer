@@ -81,31 +81,47 @@ The Aegis codebase utilizes preprocessor directives (`#ifdef AEGIS_TRIAL_VERSION
 
 ## Integration & Build Instructions
 
-Aegis is built using standard CMake. It is designed to be linked statically to the host AI application.
+## How to Use Aegis (Step-by-Step)
 
-### Building the Industrial Engine
-```bash
-mkdir build && cd build
-cmake ..
-make
+Aegis runs completely separate from your AI agent. It acts like an independent security camera. You just need to tell your AI agent to send data to it.
 
+### Step 1: Add Aegis to your AI Agent's Code
+First, you add our lightweight header file to your existing AI agent's code. Your agent doesn't run Aegis; it just drops its telemetry into a shared mailbox (`/dev/shm`).
 
-2. IGNITION
+Add these lines to your AI agent's code:
+
+```cpp
 #include "aegis.hpp"
 
 int main() {
-    // Ignite the autonomous engine
-    Aegis engine; 
-    
-    // Register agent and retrieve the 64-bit anti-spoofing token
-    uint64_t secure_token = engine.register_agent();
+    // 1. Get a secure token for your agent
+    uint64_t secure_token = register_agent_to_shared_memory();
 
-    // Application logic...
+    // 2. Whenever your AI makes a decision or tool call, push the record
+    push_to_ring_buffer(secure_token, ...);
+
+    // Your normal AI logic continues here without any slowdown...
     return 0;
 }
 
+# Step 2: Turn on the Aegis Daemon (The Observer)
+Before you run your AI agent, you need to turn on Aegis so it can listen. Open a terminal and run these commands to start the background daemon:
 
-Execution & Graceful Shutdown (Stopping Mid-Way)
+Bash
+
+mkdir build && cd build
+cmake ..
+make
+./aegis_test
+(You will see a message saying Aegis is listening. Leave this terminal open.)
+
+# Step 3: Run Your AI Agent
+Now, simply run your AI agent exactly as you normally would.
+
+As your agent works, Aegis will silently observe the data flowing through the shared memory and automatically generate your security logs (aegis_session_report.txt and aegis_ledger.bin) in the background.
+
+
+## Execution & Graceful Shutdown (Stopping Mid-Way)
 The engine relies on C++ RAII (Resource Acquisition Is Initialization) to manage its lifecycle safely.
 
 If you need to halt the AI application mid-way (e.g., pressing Ctrl+C or a sudden process interrupt), the Aegis destructor automatically triggers a graceful shutdown sequence:
