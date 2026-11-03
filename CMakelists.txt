@@ -1,0 +1,32 @@
+cmake_minimum_required(VERSION 3.15)
+project(AegisEngine CXX)
+
+# --- 72-HOUR TRIAL LOCK LOGIC ---
+option(BUILD_TRIAL "Build 72-hour trial version" OFF)
+if(BUILD_TRIAL)
+    string(TIMESTAMP CURRENT_UNIX_TIME "%s")
+    add_compile_definitions(AEGIS_TRIAL_VERSION=1)
+    add_compile_definitions(AEGIS_BUILD_TIME=${CURRENT_UNIX_TIME})
+    message(STATUS "[Aegis] TRIAL MODE ENABLED: 72-hour countdown starts at compilation.")
+endif()
+# --------------------------------
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+include_directories(include)
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG")
+
+# 1. Build the black-box static binary library
+add_library(aegis STATIC 
+    src/passive_observer.cpp
+    src/aegis.cpp
+)
+
+# 2. Build the client application (our hacker test)
+add_executable(aegis_test 
+    src/main.cpp
+)
+
+# 3. Link the client application securely to the binary
+target_link_libraries(aegis_test aegis)
