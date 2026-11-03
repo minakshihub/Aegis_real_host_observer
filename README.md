@@ -80,6 +80,8 @@ The Aegis codebase utilizes preprocessor directives (`#ifdef AEGIS_TRIAL_VERSION
 ---
 
 ## Integration & Build Instructions
+Chronologically, a developer has to add the code to their AI agent before they can run the whole system together. If we want this to be completely foolproof for anyone to understand, and execute and experience it in real life,
+Here is the revised, hyper-simple sequence. It walks them through exactly what to do step-by-step:
 
 ## How to Use Aegis (Step-by-Step)
 
